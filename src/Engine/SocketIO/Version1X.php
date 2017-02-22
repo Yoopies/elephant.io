@@ -45,7 +45,9 @@ class Version1X extends AbstractSocketIO
             return;
         }
 
-        $this->handshake();
+        if (self::TRANSPORT_POLLING == $this->options['transport']) {
+            $this->handshake();
+        }
 
         $errors = [null, null];
         $host   = sprintf('%s:%d', $this->url['host'], $this->url['port']);
@@ -187,10 +189,12 @@ class Version1X extends AbstractSocketIO
     /** Upgrades the transport to WebSocket */
     private function upgradeTransport()
     {
-        $query = ['sid'       => $this->session->id,
-                  'EIO'       => $this->options['version'],
-                  'use_b64'   => $this->options['use_b64'],
+        $query = ['EIO'       => $this->options['version'],
                   'transport' => static::TRANSPORT_WEBSOCKET];
+
+        if (null !== $this->session) {
+            $query['sid'] = $this->session->id;
+        }
 
         $url = sprintf('/%s/?%s', trim($this->url['path'], '/'), http_build_query($query));
         $key = base64_encode(sha1(uniqid(mt_rand(), true), true));
