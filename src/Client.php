@@ -50,10 +50,9 @@ class Client
     /**
      * Connects to the websocket
      *
-     * @param boolean $keepAlive keep alive the connection (not supported yet) ?
      * @return $this
      */
-    public function initialize($keepAlive = false)
+    public function initialize()
     {
         try {
             $this->logger->debug('Connecting to the websocket');
@@ -61,11 +60,6 @@ class Client
             $this->logger->debug('Connected to the server');
 
             $this->isConnected = true;
-
-            if (true === $keepAlive) {
-                $this->logger->debug('Keeping alive the connection to the websocket');
-                $this->engine->keepAlive();
-            }
         } catch (SocketException $e) {
             $this->logger->error('Could not connect to the server', ['exception' => $e]);
 
@@ -78,7 +72,7 @@ class Client
     /**
      * Reads a message from the socket
      *
-     * @return MessageInterface Message read from the socket
+     * @return string Message read from the socket
      */
     public function read()
     {
@@ -88,6 +82,9 @@ class Client
 
     /**
      * Emits a message through the engine
+     *
+     * @param string $event
+     * @param array  $args
      *
      * @return $this
      */
@@ -138,4 +135,3 @@ class Client
         return $this->engine;
     }
 }
-

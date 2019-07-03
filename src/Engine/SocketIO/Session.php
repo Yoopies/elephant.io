@@ -26,7 +26,7 @@ class Session
     /** @var integer session's last heartbeat */
     private $heartbeat;
 
-    /** @var integer[] session's and heartbeat's timeouts */
+    /** @var float[] session's and heartbeat's timeouts */
     private $timeouts;
 
     /** @var string[] supported upgrades */
@@ -36,19 +36,24 @@ class Session
     {
         $this->id        = $id;
         $this->upgrades  = $upgrades;
-        $this->heartbeat = time();
+        $this->heartbeat = \microtime(true);
 
-        $this->timeouts  = ['timeout'  => $timeout,
-                            'interval' => $interval];
+        $this->timeouts  = ['timeout'  => (float)$timeout,
+                            'interval' => (float)$interval];
     }
 
-    /** The property should not be modified, hence the private accessibility on them */
+    /**
+     * The property should not be modified, hence the private accessibility on them
+     *
+     * @param string $prop
+     * @return mixed
+     */
     public function __get($prop)
     {
         static $list = ['id', 'upgrades'];
 
-        if (!in_array($prop, $list)) {
-            throw new InvalidArgumentException(sprintf('Unknown property "%s" for the Session object. Only the following are availables : ["%s"]', $prop, implode('", "', $list)));
+        if (!\in_array($prop, $list)) {
+            throw new InvalidArgumentException(\sprintf('Unknown property "%s" for the Session object. Only the following are availables : ["%s"]', $prop, \implode('", "', $list)));
         }
 
         return $this->$prop;
@@ -61,8 +66,8 @@ class Session
      */
     public function needsHeartbeat()
     {
-        if (0 < $this->timeouts['interval'] && time() > ($this->timeouts['interval'] + $this->heartbeat - 5)) {
-            $this->heartbeat = time();
+        if (0 < $this->timeouts['interval'] && \microtime(true) > ($this->timeouts['interval'] + $this->heartbeat - 5)) {
+            $this->heartbeat = \microtime(true);
 
             return true;
         }
@@ -70,4 +75,3 @@ class Session
         return false;
     }
 }
-
